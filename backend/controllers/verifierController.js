@@ -1,25 +1,31 @@
-import {db} from "../config/db.js";
+import { db } from "../config/db.js";
 
-export const verifyProof = async (req, res) => {
-  const { proofId } = req.body;
-  const proofRecord = db.data.proofs.find(p => p.id === proofId);
-
-  if (!proofRecord) return res.status(404).json({ error: "Proof not found" });
-
-  const payload = proofRecord.payload;
-  const hasGroth16Shape =
-    payload.protocol === "groth16" &&
-    Array.isArray(payload.proof?.pi_a) &&
-    Array.isArray(payload.publicSignals);
-
-  const isValid = hasGroth16Shape && payload.publicSignals[0] === "1";
+// 1. Verifier creates a condition/policy
+export const createRequest = async (req, res) => {
+  const { parameterKey, operator, threshold } = req.body;
   
-  proofRecord.status = isValid ? "verified" : "failed";
-  await db.write(); // Save status update to db.json
+  const request = {
+    id: `req_${Date.now()}`,
+    verifierId: req.user.id,
+    parameterKey,
+    operator,
+    threshold,
+    status: "pending", // pending, verified, or failed
+    createdAt: new Date().toISOString()
+  };
 
-  res.json({ 
-    valid: isValid, 
-    condition: payload.condition,
-    message: isValid ? "Cryptographic Proof Validated" : "Verification Failed"
-  });
+  db.data.requests.push(request);
+  await db.write();
+
+  res.json({ message: "Verification Request Created", request });
+};
+
+// 2. Verifier checks if the Prover fulfilled it
+export const checkRequestStatus = (req, res) => {
+  const { requestId } = req.params;
+  const request = db.data.requests.find(r => r.id === requestId && r.verifierId === req.user.id);
+
+  if (!request) return res.status(404).json({ error: "Request not found or unauthorized" });
+
+  res.json({ request });
 };

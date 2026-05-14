@@ -11,6 +11,8 @@ export default function ProverPortal() {
   const [credentials, setCredentials] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [reqIdInput, setReqIdInput] = useState("");
+  const [activeRequest, setActiveRequest] = useState(null);
 
   // Check localStorage on load
   useEffect(() => {
@@ -62,20 +64,29 @@ export default function ProverPortal() {
     }
   }
 
+  async function handleLoadRequest(e) {
+    e.preventDefault();
+    try {
+      const res = await api.getVerificationRequest(reqIdInput, token);
+      setActiveRequest(res.request);
+      setMessage(`Request loaded: Prove that ${res.request.parameterKey} ${res.request.operator} ${res.request.threshold}`);
+    } catch (err) { setMessage(err.message); }
+  }
+
   async function handleGenerateProof(credential) {
     setLoading(true);
-    setMessage("Generating zero-knowledge proof locally...");
     try {
-      const parameterKey = Object.keys(credential.parameters)[0];
+      // Create proof based on Verifier's exact request
       const proofPayload = await createLocalProof({
         credential,
-        parameterKey,
-        operator: "<",
-        threshold: "100" 
+        parameterKey: activeRequest.parameterKey,
+        operator: activeRequest.operator,
+        threshold: activeRequest.threshold
       });
 
-      const res = await api.submitProof(proofPayload, token);
-      setMessage(`Success! Proof submitted. Your Proof ID is: ${res.proofId}`);
+      await api.submitProof({ requestId: activeRequest.id, proofPayload }, token);
+      setMessage("✅ Success! Proof generated locally and submitted to Verifier.");
+      setActiveRequest(null); // Clear request after fulfilling
     } catch (err) {
       setMessage(`Proof Error: ${err.message}`);
     } finally {
@@ -113,41 +124,49 @@ export default function ProverPortal() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto bg-white rounded-lg shadow-soft border border-sky-100">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-sky-100 pb-4 mb-6 gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-medical-navy">Your Secure Wallet</h2>
-          <p className="text-slate-600 font-medium mt-1">Logged in as: {user?.name} ({user?.id})</p>
-        </div>
-        <button onClick={handleLogout} className="bg-slate-100 text-slate-700 px-4 py-2 rounded font-semibold hover:bg-slate-200 transition">
-          Log Out
-        </button>
+      <div className="flex justify-between items-center border-b border-sky-100 pb-4 mb-6">
+        <h2 className="text-2xl font-bold text-medical-navy">Your Secure Wallet</h2>
+        <button onClick={handleLogout} className="bg-slate-100 text-slate-700 px-4 py-2 rounded">Log Out</button>
       </div>
 
-      {message && <div className="mb-6 p-4 bg-medical-mint border border-emerald-200 text-emerald-800 font-semibold rounded">{message}</div>}
-      
-      {credentials.length === 0 ? (
-        <div className="text-center p-8 bg-sky-50 rounded-lg border border-sky-100">
-          <p className="text-slate-600 font-medium">Your wallet is empty. No credentials issued yet.</p>
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {credentials.map(cred => (
-            <div key={cred.id} className="border border-sky-100 p-5 rounded-lg bg-sky-50/50 shadow-sm">
-              <span className="text-xs font-bold uppercase tracking-wider text-medical-blue">Signed Document</span>
-              <h3 className="font-bold text-xl text-medical-navy mt-1">{cred.documentType}</h3>
-              <p className="text-sm text-slate-600 mt-2"><span className="font-semibold">Issuer:</span> {cred.issuer}</p>
-              <p className="text-sm text-slate-600"><span className="font-semibold">Parameters:</span> {Object.keys(cred.parameters).join(", ")}</p>
-              <button 
-                onClick={() => handleGenerateProof(cred)}
-                disabled={loading}
-                className="mt-5 w-full bg-medical-green hover:bg-emerald-600 text-white px-4 py-3 rounded font-semibold shadow-sm transition disabled:bg-slate-400 disabled:cursor-not-allowed"
-              >
-                {loading ? "Generating ZKP..." : "Generate Proof (< 100)"}
-              </button>
+      {message && <div className="mb-6 p-4 bg-sky-50 text-sky-800 font-semibold rounded">{message}</div>}
+
+      {/* Step 1: Input Verifier's Request */}
+      <div className="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-lg">
+        <h3 className="font-bold text-lg text-slate-800">Fulfill a Request</h3>
+        <p className="text-sm text-slate-600 mb-4">Paste the Request ID provided by your employer or insurer.</p>
+        <form onSubmit={handleLoadRequest} className="flex gap-2">
+          <input required value={reqIdInput} onChange={e => setReqIdInput(e.target.value)} className="border p-2 rounded flex-1" placeholder="e.g., req_17000000..." />
+          <button type="submit" className="bg-medical-navy text-white px-4 rounded">Load Request</button>
+        </form>
+      </div>
+
+      {/* Step 2: Select Credential to Fulfill the Request */}
+      <h3 className="font-bold text-lg text-medical-navy mb-4">Your Medical Records</h3>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {credentials.map(cred => {
+          // Check if this credential has the data the Verifier is asking for
+          const canFulfill = activeRequest && cred.parameters.hasOwnProperty(activeRequest.parameterKey);
+
+          return (
+            <div key={cred.id} className="border border-sky-100 p-5 rounded-lg bg-white shadow-sm">
+              <h3 className="font-bold text-xl text-medical-navy">{cred.documentType}</h3>
+              <p className="text-sm text-slate-600 mt-2">Issuer: {cred.issuer}</p>
+              <p className="text-sm text-slate-600">Parameters: {Object.keys(cred.parameters).join(", ")}</p>
+              
+              {activeRequest && (
+                <button 
+                  onClick={() => handleGenerateProof(cred)}
+                  disabled={loading || !canFulfill}
+                  className={`mt-4 w-full px-4 py-2 rounded font-semibold text-white ${canFulfill ? 'bg-medical-green hover:bg-emerald-600' : 'bg-slate-300 cursor-not-allowed'}`}
+                >
+                  {loading ? "Generating ZKP..." : canFulfill ? "Use This Credential" : "Missing Required Data"}
+                </button>
+              )}
             </div>
-          ))}
-        </div>
-      )}
+          )
+        })}
+      </div>
     </div>
   );
 }

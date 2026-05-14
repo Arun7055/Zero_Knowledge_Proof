@@ -1,4 +1,9 @@
 import { JSONFilePreset } from 'lowdb/node';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const backendDir = path.resolve(__dirname, '..');
 
 // ==========================================
 // 1. DATA DATABASE (db.json)
@@ -6,9 +11,10 @@ import { JSONFilePreset } from 'lowdb/node';
 // ==========================================
 const defaultData = {
   credentials: [],
-  proofs: []
+  proofs: [],
+  requests: []
 };
-export const db = await JSONFilePreset('db.json', defaultData);
+export const db = await JSONFilePreset(path.join(backendDir, 'db.json'), defaultData);
 
 
 // ==========================================
@@ -18,4 +24,4 @@ export const db = await JSONFilePreset('db.json', defaultData);
 const defaultAuthData = {
   users: []
 };
-export const authDb = await JSONFilePreset('db2.json', defaultAuthData);
+export const authDb = await JSONFilePreset(path.join(backendDir, 'db2.json'), defaultAuthData);

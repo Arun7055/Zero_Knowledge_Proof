@@ -1,6 +1,6 @@
 // frontend/src/utils/api.js
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
 /**
  * A reusable helper function to handle all API requests and automatically
@@ -63,16 +63,14 @@ export const api = {
   // ==========================================
   // PROVER (Patient) ENDPOINTS
   // ==========================================
-  getCredentials: (token) => 
-    fetchWithAuth("/prover/credentials", "GET", null, token),
-    
-  submitProof: (proofPayload, token) => 
-    fetchWithAuth("/prover/submit-proof", "POST", { proofPayload }, token),
+  getCredentials: (token) => fetchWithAuth("/prover/credentials", "GET", null, token),
+  getVerificationRequest: (reqId, token) => fetchWithAuth(`/prover/request/${reqId}`, "GET", null, token),
+  submitProof: (payload, token) => fetchWithAuth("/prover/submit-proof", "POST", payload, token),
 
 
   // ==========================================
   // VERIFIER ENDPOINTS
   // ==========================================
-  verifyProof: (proofId, token) => 
-    fetchWithAuth("/verifier/verify", "POST", { proofId }, token),
+  createRequest: (payload, token) => fetchWithAuth("/verifier/request", "POST", payload, token),
+  checkRequestStatus: (reqId, token) => fetchWithAuth(`/verifier/request/${reqId}`, "GET", null, token),
 };

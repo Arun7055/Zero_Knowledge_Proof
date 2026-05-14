@@ -1,4 +1,65 @@
 {
-    "credentials": [],
-    "proofs": []
-  }
+  "credentials": [
+    {
+      "id": "cred_1778775111053",
+      "patientId": "Arun_82",
+      "documentType": "Blood Test",
+      "parameters": {
+        "Blood_Sugar": "90"
+      },
+      "issuer": "DOC-1",
+      "signature": "0xmock_sig_eyJwYXRpZW50SWQiOiJBcnVuXzgyIiwi",
+      "issuedAt": "2026-05-14T16:11:51.053Z"
+    }
+  ],
+  "proofs": [],
+  "requests": [
+    {
+      "id": "req_1778775136003",
+      "verifierId": "VER-1",
+      "parameterKey": "Blood_Sugar",
+      "operator": "<",
+      "threshold": "100",
+      "status": "verified",
+      "createdAt": "2026-05-14T16:12:16.003Z",
+      "proofPayload": {
+        "protocol": "groth16",
+        "curve": "bn128",
+        "proof": {
+          "pi_a": [
+            "12889324585732915...",
+            "20134932948039284...",
+            "1"
+          ],
+          "pi_b": [
+            [
+              "11234982...",
+              "99238475..."
+            ],
+            [
+              "21093847...",
+              "34982039..."
+            ],
+            [
+              "1",
+              "0"
+            ]
+          ],
+          "pi_c": [
+            "8746502938475029...",
+            "19283746556473...",
+            "1"
+          ]
+        },
+        "publicSignals": [
+          "1"
+        ],
+        "condition": "Blood_Sugar < 100",
+        "credentialSchema": "local-zkp-v1",
+        "documentType": "Blood Test",
+        "generatedAt": "2026-05-14T16:12:31.882Z"
+      },
+      "fulfilledBy": "Arun_82"
+    }
+  ]
+}

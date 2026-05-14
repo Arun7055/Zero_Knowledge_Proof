@@ -1,9 +1,8 @@
 import express from "express";
 import { requireRole } from "../middlewares/authMiddleware.js";
-import { verifyProof } from "../controllers/verifierController.js";
+import { createRequest, checkRequestStatus } from "../controllers/verifierController.js";
 
 const router = express.Router();
-
-router.post("/verify", requireRole("verifier"), verifyProof);
-
+router.post("/request", requireRole("verifier"), createRequest);
+router.get("/request/:requestId", requireRole("verifier"), checkRequestStatus);
 export default router;
