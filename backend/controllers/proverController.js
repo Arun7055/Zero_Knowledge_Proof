@@ -1,4 +1,4 @@
-import db from "../config/db.js";
+import {db} from "../config/db.js";
 
 export const getCredentials = (req, res) => {
   const patientCredentials = db.data.credentials.filter(c => c.patientId === req.user.id);

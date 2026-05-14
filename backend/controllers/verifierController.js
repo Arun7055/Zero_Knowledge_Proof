@@ -1,4 +1,4 @@
-import db from "../config/db.js";
+import {db} from "../config/db.js";
 
 export const verifyProof = async (req, res) => {
   const { proofId } = req.body;

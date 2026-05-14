@@ -1,4 +1,4 @@
-import db from "../config/db.js";
+import {db} from "../config/db.js";
 
 export const issueCredential = async (req, res) => {
   const { patientId, documentType, parameters } = req.body;
