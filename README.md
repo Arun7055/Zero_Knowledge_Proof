@@ -2,9 +2,6 @@
 
 A full-stack Self-Sovereign Identity (SSI) platform that allows organizations to issue credentials, users to store them securely, and third parties to verify them without exposing the underlying raw data.
 
-### 🚀 Live Demo
-[Insert Link Here]
-
 ### 🧠 The Architecture
 The platform is built on a 3-tier architecture:
 1. **Issuers (Doctors, Banks, Universities):** Cryptographically sign and issue data to the user (e.g., Blood Sugar = 90, Credit Score = 750).
