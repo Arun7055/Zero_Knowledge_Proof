@@ -18,13 +18,3 @@ The platform is built on a 3-tier architecture:
 * **Multi-Domain Categorization:** Automatically routes credentials into Health, Finance, or Education vaults.
 * **Smart Verification:** Prover wallet automatically disables expired credentials or documents that lack the required parameters.
 * **Audit Trail Dashboard:** Users have a permanent history of exactly who verified their data, what policy was checked, and when.
-
-### 💻 Run Locally
-1. Clone the repo: `git clone [your-repo-link]`
-2. Install dependencies:
-   - `cd frontend && npm install`
-   - `cd backend && npm install`
-3. Setup `.env` in the backend with `JWT_SECRET=your_secret` and `MONGO_URI=mongodb://127.0.0.1:27017/zkp_platform`
-4. Start development servers:
-   - Frontend: `npm run dev`
-   - Backend: `node server.js`
