@@ -5,8 +5,12 @@ import authRoutes from "./routes/authRoutes.js";
 import issuerRoutes from "./routes/issuerRoutes.js";
 import proverRoutes from "./routes/proverRoutes.js";
 import verifierRoutes from "./routes/verifierRoutes.js";
+import { connectDB } from './config/db.js';
 
 const app = express();
+
+// Connect to MongoDB before setting up routes
+connectDB();
 
 const allowedOrigins = [
   "http://localhost:5173",

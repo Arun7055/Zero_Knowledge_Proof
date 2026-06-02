@@ -141,32 +141,52 @@ export default function ProverPortal() {
         </form>
       </div>
 
-      {/* Step 2: Select Credential to Fulfill the Request */}
-      <h3 className="font-bold text-lg text-medical-navy mb-4">Your Medical Records</h3>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {credentials.map(cred => {
-          // Check if this credential has the data the Verifier is asking for
-          const canFulfill = activeRequest && cred.parameters.hasOwnProperty(activeRequest.parameterKey);
+      {/* Step 2: Your Categorized Medical, Financial, and Educational Records */}
+      <h3 className="font-bold text-lg text-medical-navy mb-4">Your Secure Data Vault</h3>
+      
+      {credentials.length === 0 ? (
+        <div className="text-center p-8 bg-sky-50 rounded-lg border border-sky-100">
+          <p className="text-slate-600 font-medium">Your wallet is empty. No credentials issued yet.</p>
+        </div>
+      ) : (
+        <div className="grid gap-8">
+          {["Health", "Finance", "Education"].map(domainName => {
+            // Filter credentials for this specific domain category
+            const domainCreds = credentials.filter(cred => cred.domain === domainName);
+            
+            if (domainCreds.length === 0) return null; // Skip if they have no creds in this domain
 
-          return (
-            <div key={cred.id} className="border border-sky-100 p-5 rounded-lg bg-white shadow-sm">
-              <h3 className="font-bold text-xl text-medical-navy">{cred.documentType}</h3>
-              <p className="text-sm text-slate-600 mt-2">Issuer: {cred.issuer}</p>
-              <p className="text-sm text-slate-600">Parameters: {Object.keys(cred.parameters).join(", ")}</p>
-              
-              {activeRequest && (
-                <button 
-                  onClick={() => handleGenerateProof(cred)}
-                  disabled={loading || !canFulfill}
-                  className={`mt-4 w-full px-4 py-2 rounded font-semibold text-white ${canFulfill ? 'bg-medical-green hover:bg-emerald-600' : 'bg-slate-300 cursor-not-allowed'}`}
-                >
-                  {loading ? "Generating ZKP..." : canFulfill ? "Use This Credential" : "Missing Required Data"}
-                </button>
-              )}
-            </div>
-          )
-        })}
-      </div>
+            return (
+              <div key={domainName} className="border-t border-slate-200 pt-6">
+                <h4 className="text-xl font-extrabold text-slate-800 mb-4">{domainName} Credentials</h4>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {domainCreds.map(cred => {
+                    const canFulfill = activeRequest && cred.parameters.hasOwnProperty(activeRequest.parameterKey);
+
+                    return (
+                      <div key={cred.id} className="border border-sky-100 p-5 rounded-lg bg-white shadow-sm">
+                        <h3 className="font-bold text-xl text-medical-navy">{cred.documentType}</h3>
+                        <p className="text-sm text-slate-600 mt-2">Issuer: {cred.issuer}</p>
+                        <p className="text-sm text-slate-600">Parameters: {Object.keys(cred.parameters).join(", ")}</p>
+                        
+                        {activeRequest && (
+                          <button 
+                            onClick={() => handleGenerateProof(cred)}
+                            disabled={loading || !canFulfill}
+                            className={`mt-4 w-full px-4 py-2 rounded font-semibold text-white transition ${canFulfill ? 'bg-medical-blue hover:bg-sky-700' : 'bg-slate-300 cursor-not-allowed'}`}
+                          >
+                            {loading ? "Generating ZKP..." : canFulfill ? "Use This Document" : "Missing Required Data"}
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

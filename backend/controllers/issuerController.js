@@ -1,20 +1,31 @@
-import {db} from "../config/db.js";
+import Credential from "../models/Credential.js";
 
 export const issueCredential = async (req, res) => {
-  const { patientId, documentType, parameters } = req.body;
-  
-  const unsignedPayload = { patientId, documentType, parameters, issuer: req.user.id };
-  const signature = Buffer.from(JSON.stringify(unsignedPayload)).toString('base64').slice(0, 32);
+  try {
+    const { patientId, documentType, parameters } = req.body;
+    
+    // 1. Create the unsigned payload structure
+    const unsignedPayload = { 
+      patientId, 
+      documentType, 
+      parameters, 
+      issuer: req.user.id,
+      domain: req.user.domain // Automatically tags with the logged-in issuer's domain
+    };
+    
+    // 2. Generate a mock cryptographic signature based on the data
+    const signatureText = Buffer.from(JSON.stringify(unsignedPayload)).toString('base64').slice(0, 32);
+    const mockSignature = `0xmock_sig_${signatureText}`;
 
-  const credential = {
-    id: `cred_${Date.now()}`,
-    ...unsignedPayload,
-    signature: `0xmock_sig_${signature}`,
-    issuedAt: new Date().toISOString()
-  };
+    // 3. Save the credential directly into MongoDB
+    const credential = await Credential.create({
+      id: `cred_${Date.now()}`,
+      ...unsignedPayload,
+      signature: mockSignature
+    });
 
-  db.data.credentials.push(credential);
-  await db.write(); // Save to db.json
-
-  res.json({ message: "Credential issued successfully", credential });
+    res.json({ message: "Credential issued successfully and saved to MongoDB", credential });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
