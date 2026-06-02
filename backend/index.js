@@ -41,7 +41,7 @@ app.use("/api/prover", proverRoutes);
 app.use("/api/verifier", verifierRoutes);
 
 const PORT = process.env.PORT || 5001;
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, "0.0.0.0",() => {
   console.log(`ZKP Backend running on port ${PORT}`);
 });
 
