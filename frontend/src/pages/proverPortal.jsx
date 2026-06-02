@@ -46,6 +46,7 @@ export default function ProverPortal() {
       localStorage.setItem("proverUser", JSON.stringify(res.user));
       
       loadCredentials(res.token);
+      loadAuditLogs(res.token);
     } catch (err) {
       setMessage(`Auth Error: ${err.message}`);
     }
@@ -55,6 +56,7 @@ export default function ProverPortal() {
     setToken(null);
     setUser(null);
     setCredentials([]);
+    setAuditLogs([]);
     localStorage.removeItem("proverToken");
     localStorage.removeItem("proverUser");
   }
@@ -65,6 +67,15 @@ export default function ProverPortal() {
       setCredentials(res.credentials);
     } catch (err) {
       setMessage(`Fetch Error: ${err.message}`);
+    }
+  }
+
+  async function loadAuditLogs(activeToken) {
+    try {
+      const res = await api.getAuditLogs(activeToken);
+      setAuditLogs(res.logs);
+    } catch (err) {
+      console.error("Failed to load logs", err);
     }
   }
 
@@ -87,29 +98,19 @@ export default function ProverPortal() {
         threshold: activeRequest.threshold
       });
 
-      // Pass credentialId alongside requestId and proofPayload
       await api.submitProof({ 
         requestId: activeRequest.id, 
         proofPayload,
-        credentialId: credential.id // <-- New addition
+        credentialId: credential.id
       }, token);
       
       setMessage("✅ Success! Proof generated locally and submitted to Verifier.");
       setActiveRequest(null);
-      loadAuditLogs(token);
+      loadAuditLogs(token); // Refresh logs after submitting
     } catch (err) {
       setMessage(`Proof Error: ${err.message}`);
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function loadAuditLogs(activeToken) {
-    try {
-      const res = await api.getAuditLogs(activeToken);
-      setAuditLogs(res.logs);
-    } catch (err) {
-      console.error("Failed to load logs", err);
     }
   }
 
@@ -166,51 +167,78 @@ export default function ProverPortal() {
 
       {message && <div className="mb-6 p-4 bg-sky-50 text-sky-800 font-semibold rounded">{message}</div>}
 
-      {/* VIEW: WALLET */}
+      {/* ========================================== */}
+      {/* VIEW: WALLET (Categorized)                 */}
+      {/* ========================================== */}
       {activeTab === "wallet" && (
         <>
           <div className="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-lg">
             <h3 className="font-bold text-lg text-slate-800">Fulfill a Request</h3>
+            <p className="text-sm text-slate-600 mb-4">Paste the Request ID provided by your employer or insurer.</p>
             <form onSubmit={handleLoadRequest} className="flex gap-2 mt-4">
               <input required value={reqIdInput} onChange={e => setReqIdInput(e.target.value)} className="border p-2 rounded flex-1" placeholder="e.g., req_17000000..." />
               <button type="submit" className="bg-medical-navy text-white px-4 rounded">Load Request</button>
             </form>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            {credentials.map(cred => {
-              const isExpired = new Date(cred.validUntil) < new Date();
-              const canFulfill = activeRequest && cred.parameters.hasOwnProperty(activeRequest.parameterKey);
+          <h3 className="font-bold text-lg text-medical-navy mb-4">Your Secure Data Vault</h3>
+          
+          {credentials.length === 0 ? (
+            <div className="text-center p-8 bg-sky-50 rounded-lg border border-sky-100">
+              <p className="text-slate-600 font-medium">Your wallet is empty. No credentials issued yet.</p>
+            </div>
+          ) : (
+            <div className="grid gap-8">
+              {["Health", "Finance", "Education"].map(domainName => {
+                const domainCreds = credentials.filter(cred => cred.domain === domainName);
+                if (domainCreds.length === 0) return null; 
 
-              return (
-                <div key={cred.id} className={`border p-5 rounded-lg shadow-sm ${isExpired ? 'bg-red-50 border-red-200' : 'bg-white border-sky-100'}`}>
-                  <h3 className="font-bold text-xl text-medical-navy">{cred.documentType}</h3>
-                  <p className="text-sm text-slate-600 mt-2">Issuer: {cred.issuer}</p>
-                  <p className={`text-sm font-bold mt-2 ${isExpired ? 'text-red-600' : 'text-emerald-600'}`}>
-                    {isExpired ? `Expired: ${new Date(cred.validUntil).toLocaleDateString()}` : `Valid until: ${new Date(cred.validUntil).toLocaleDateString()}`}
-                  </p>
-                  
-                  {activeRequest && (
-                    <button 
-                      onClick={() => handleGenerateProof(cred)}
-                      disabled={loading || !canFulfill || isExpired}
-                      className={`mt-4 w-full px-4 py-2 rounded font-semibold text-white transition 
-                        ${isExpired ? 'bg-red-300 cursor-not-allowed' : 
-                          canFulfill ? 'bg-medical-blue hover:bg-sky-700' : 'bg-slate-300 cursor-not-allowed'}`}
-                    >
-                      {loading ? "Generating ZKP..." : 
-                       isExpired ? "Document Expired" : 
-                       canFulfill ? "Use This Document" : "Missing Required Data"}
-                    </button>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+                return (
+                  <div key={domainName} className="border-t border-slate-200 pt-6">
+                    <h4 className="text-xl font-extrabold text-slate-800 mb-4">{domainName} Credentials</h4>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {domainCreds.map(cred => {
+                        const isExpired = new Date(cred.validUntil) < new Date();
+                        const canFulfill = activeRequest && cred.parameters.hasOwnProperty(activeRequest.parameterKey);
+                      
+                        return (
+                          <div key={cred.id} className={`border p-5 rounded-lg shadow-sm ${isExpired ? 'bg-red-50 border-red-200' : 'bg-white border-sky-100'}`}>
+                            <h3 className="font-bold text-xl text-medical-navy">{cred.documentType}</h3>
+                            <p className="text-sm text-slate-600 mt-2">Issuer: {cred.issuer}</p>
+                            <p className="text-sm text-slate-600">Parameters: {Object.keys(cred.parameters).join(", ")}</p>
+                            
+                            <p className={`text-sm font-bold mt-2 ${isExpired ? 'text-red-600' : 'text-emerald-600'}`}>
+                              {isExpired ? `Expired on: ${new Date(cred.validUntil).toLocaleDateString()}` : `Valid until: ${new Date(cred.validUntil).toLocaleDateString()}`}
+                            </p>
+                            
+                            {activeRequest && (
+                              <button 
+                                onClick={() => handleGenerateProof(cred)}
+                                disabled={loading || !canFulfill || isExpired} 
+                                className={`mt-4 w-full px-4 py-2 rounded font-semibold text-white transition 
+                                  ${isExpired ? 'bg-red-300 cursor-not-allowed' : 
+                                    canFulfill ? 'bg-medical-blue hover:bg-sky-700' : 'bg-slate-300 cursor-not-allowed'}`}
+                              >
+                                {loading ? "Generating ZKP..." : 
+                                 isExpired ? "Document Expired" : 
+                                 canFulfill ? "Use This Document" : "Missing Required Data"}
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </>
       )}
 
-      {/* VIEW: AUDIT HISTORY */}
+      {/* ========================================== */}
+      {/* VIEW: AUDIT HISTORY                        */}
+      {/* ========================================== */}
       {activeTab === "history" && (
         <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
           {auditLogs.length === 0 ? (

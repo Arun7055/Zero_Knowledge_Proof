@@ -5,13 +5,13 @@ export default function Home() {
     <section className="mx-auto max-w-4xl py-12">
       <div className="text-center">
         <p className="text-sm font-semibold uppercase tracking-[0.16em] text-sky-600">
-          Privacy-Preserving Healthcare
+          Privacy-Preserving Identity
         </p>
         <h1 className="mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl">
-          Zero-Knowledge Medical Records
+          Zero-Knowledge Digital Credentials
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600">
-          Prove your medical status (like blood test results or prescriptions) to third parties without ever revealing the raw underlying data. Choose your role below to begin.
+          Prove your verified data (like credit scores, degrees, or health records) to third parties without ever revealing the raw underlying information. Choose your role below to begin.
         </p>
       </div>
 
@@ -28,9 +28,9 @@ export default function Home() {
           </div>
           <h2 className="mt-6 text-xl font-bold text-slate-900">Issuer</h2>
           <p className="mt-2 text-sm text-slate-600">
-            For Hospitals & Doctors. Issue cryptographically signed medical credentials to patients.
+            For Institutions & Organizations. Issue cryptographically signed digital credentials to users.
           </p>
-          <span className="mt-6 text-sm font-bold text-sky-600">Login as Doctor &rarr;</span>
+          <span className="mt-6 text-sm font-bold text-sky-600">Login as Issuer &rarr;</span>
         </Link>
 
         {/* Prover Card */}
@@ -45,9 +45,9 @@ export default function Home() {
           </div>
           <h2 className="mt-6 text-xl font-bold text-slate-900">Prover</h2>
           <p className="mt-2 text-sm text-slate-600">
-            For Patients. Generate Zero-Knowledge proofs locally on your device without exposing data.
+            For Users. Generate Zero-Knowledge proofs locally on your device without exposing your raw data.
           </p>
-          <span className="mt-6 text-sm font-bold text-emerald-600">Login as Patient &rarr;</span>
+          <span className="mt-6 text-sm font-bold text-emerald-600">Login as User &rarr;</span>
         </Link>
 
         {/* Verifier Card */}
@@ -62,7 +62,7 @@ export default function Home() {
           </div>
           <h2 className="mt-6 text-xl font-bold text-slate-900">Verifier</h2>
           <p className="mt-2 text-sm text-slate-600">
-            For Insurance / Employers. Verify mathematical proofs submitted by patients instantly.
+            For Employers & Agencies. Verify mathematical proofs submitted by users instantly.
           </p>
           <span className="mt-6 text-sm font-bold text-slate-700">Login as Verifier &rarr;</span>
         </Link>
