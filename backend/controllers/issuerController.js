@@ -2,13 +2,15 @@ import Credential from "../models/Credential.js";
 
 export const issueCredential = async (req, res) => {
   try {
-    const { patientId, documentType, parameters } = req.body;
+    const { patientId, documentType, parameters, validUntil } = req.body;
     
     // 1. Create the unsigned payload structure
+    if (!validUntil) return res.status(400).json({ error: "Expiration date is required" });
     const unsignedPayload = { 
       patientId, 
       documentType, 
       parameters, 
+      validUntil,
       issuer: req.user.id,
       domain: req.user.domain // Automatically tags with the logged-in issuer's domain
     };

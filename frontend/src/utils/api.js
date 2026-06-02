@@ -66,7 +66,7 @@ export const api = {
   getCredentials: (token) => fetchWithAuth("/prover/credentials", "GET", null, token),
   getVerificationRequest: (reqId, token) => fetchWithAuth(`/prover/request/${reqId}`, "GET", null, token),
   submitProof: (payload, token) => fetchWithAuth("/prover/submit-proof", "POST", payload, token),
-
+  getAuditLogs: (token) => fetchWithAuth("/prover/audit-logs", "GET", null, token),
 
   // ==========================================
   // VERIFIER ENDPOINTS

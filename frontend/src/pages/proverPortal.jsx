@@ -14,6 +14,9 @@ export default function ProverPortal() {
   const [reqIdInput, setReqIdInput] = useState("");
   const [activeRequest, setActiveRequest] = useState(null);
 
+  const [activeTab, setActiveTab] = useState("wallet"); // 'wallet' or 'history'
+  const [auditLogs, setAuditLogs] = useState([]);
+
   // Check localStorage on load
   useEffect(() => {
     const savedToken = localStorage.getItem("proverToken");
@@ -22,6 +25,7 @@ export default function ProverPortal() {
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
       loadCredentials(savedToken);
+      loadAuditLogs(savedToken);
     }
   }, []);
 
@@ -76,7 +80,6 @@ export default function ProverPortal() {
   async function handleGenerateProof(credential) {
     setLoading(true);
     try {
-      // Create proof based on Verifier's exact request
       const proofPayload = await createLocalProof({
         credential,
         parameterKey: activeRequest.parameterKey,
@@ -84,13 +87,29 @@ export default function ProverPortal() {
         threshold: activeRequest.threshold
       });
 
-      await api.submitProof({ requestId: activeRequest.id, proofPayload }, token);
+      // Pass credentialId alongside requestId and proofPayload
+      await api.submitProof({ 
+        requestId: activeRequest.id, 
+        proofPayload,
+        credentialId: credential.id // <-- New addition
+      }, token);
+      
       setMessage("✅ Success! Proof generated locally and submitted to Verifier.");
-      setActiveRequest(null); // Clear request after fulfilling
+      setActiveRequest(null);
+      loadAuditLogs(token);
     } catch (err) {
       setMessage(`Proof Error: ${err.message}`);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadAuditLogs(activeToken) {
+    try {
+      const res = await api.getAuditLogs(activeToken);
+      setAuditLogs(res.logs);
+    } catch (err) {
+      console.error("Failed to load logs", err);
     }
   }
 
@@ -123,68 +142,107 @@ export default function ProverPortal() {
   }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto bg-white rounded-lg shadow-soft border border-sky-100">
+    <div className="p-6 max-w-4xl mx-auto bg-white rounded-lg shadow-soft border border-sky-100">
       <div className="flex justify-between items-center border-b border-sky-100 pb-4 mb-6">
         <h2 className="text-2xl font-bold text-medical-navy">Your Secure Wallet</h2>
         <button onClick={handleLogout} className="bg-slate-100 text-slate-700 px-4 py-2 rounded">Log Out</button>
       </div>
 
-      {message && <div className="mb-6 p-4 bg-sky-50 text-sky-800 font-semibold rounded">{message}</div>}
-
-      {/* Step 1: Input Verifier's Request */}
-      <div className="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-lg">
-        <h3 className="font-bold text-lg text-slate-800">Fulfill a Request</h3>
-        <p className="text-sm text-slate-600 mb-4">Paste the Request ID provided by your employer or insurer.</p>
-        <form onSubmit={handleLoadRequest} className="flex gap-2">
-          <input required value={reqIdInput} onChange={e => setReqIdInput(e.target.value)} className="border p-2 rounded flex-1" placeholder="e.g., req_17000000..." />
-          <button type="submit" className="bg-medical-navy text-white px-4 rounded">Load Request</button>
-        </form>
+      {/* Tab Navigation */}
+      <div className="flex gap-4 mb-6 border-b border-slate-200">
+        <button 
+          onClick={() => setActiveTab("wallet")} 
+          className={`pb-2 px-2 font-bold transition ${activeTab === 'wallet' ? 'text-medical-blue border-b-2 border-medical-blue' : 'text-slate-400 hover:text-slate-600'}`}
+        >
+          My Credentials
+        </button>
+        <button 
+          onClick={() => setActiveTab("history")} 
+          className={`pb-2 px-2 font-bold transition ${activeTab === 'history' ? 'text-medical-blue border-b-2 border-medical-blue' : 'text-slate-400 hover:text-slate-600'}`}
+        >
+          Access History
+        </button>
       </div>
 
-      {/* Step 2: Your Categorized Medical, Financial, and Educational Records */}
-      <h3 className="font-bold text-lg text-medical-navy mb-4">Your Secure Data Vault</h3>
-      
-      {credentials.length === 0 ? (
-        <div className="text-center p-8 bg-sky-50 rounded-lg border border-sky-100">
-          <p className="text-slate-600 font-medium">Your wallet is empty. No credentials issued yet.</p>
-        </div>
-      ) : (
-        <div className="grid gap-8">
-          {["Health", "Finance", "Education"].map(domainName => {
-            // Filter credentials for this specific domain category
-            const domainCreds = credentials.filter(cred => cred.domain === domainName);
-            
-            if (domainCreds.length === 0) return null; // Skip if they have no creds in this domain
+      {message && <div className="mb-6 p-4 bg-sky-50 text-sky-800 font-semibold rounded">{message}</div>}
 
-            return (
-              <div key={domainName} className="border-t border-slate-200 pt-6">
-                <h4 className="text-xl font-extrabold text-slate-800 mb-4">{domainName} Credentials</h4>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {domainCreds.map(cred => {
-                    const canFulfill = activeRequest && cred.parameters.hasOwnProperty(activeRequest.parameterKey);
+      {/* VIEW: WALLET */}
+      {activeTab === "wallet" && (
+        <>
+          <div className="mb-8 p-6 bg-slate-50 border border-slate-200 rounded-lg">
+            <h3 className="font-bold text-lg text-slate-800">Fulfill a Request</h3>
+            <form onSubmit={handleLoadRequest} className="flex gap-2 mt-4">
+              <input required value={reqIdInput} onChange={e => setReqIdInput(e.target.value)} className="border p-2 rounded flex-1" placeholder="e.g., req_17000000..." />
+              <button type="submit" className="bg-medical-navy text-white px-4 rounded">Load Request</button>
+            </form>
+          </div>
 
-                    return (
-                      <div key={cred.id} className="border border-sky-100 p-5 rounded-lg bg-white shadow-sm">
-                        <h3 className="font-bold text-xl text-medical-navy">{cred.documentType}</h3>
-                        <p className="text-sm text-slate-600 mt-2">Issuer: {cred.issuer}</p>
-                        <p className="text-sm text-slate-600">Parameters: {Object.keys(cred.parameters).join(", ")}</p>
-                        
-                        {activeRequest && (
-                          <button 
-                            onClick={() => handleGenerateProof(cred)}
-                            disabled={loading || !canFulfill}
-                            className={`mt-4 w-full px-4 py-2 rounded font-semibold text-white transition ${canFulfill ? 'bg-medical-blue hover:bg-sky-700' : 'bg-slate-300 cursor-not-allowed'}`}
-                          >
-                            {loading ? "Generating ZKP..." : canFulfill ? "Use This Document" : "Missing Required Data"}
-                          </button>
-                        )}
-                      </div>
-                    )
-                  })}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {credentials.map(cred => {
+              const isExpired = new Date(cred.validUntil) < new Date();
+              const canFulfill = activeRequest && cred.parameters.hasOwnProperty(activeRequest.parameterKey);
+
+              return (
+                <div key={cred.id} className={`border p-5 rounded-lg shadow-sm ${isExpired ? 'bg-red-50 border-red-200' : 'bg-white border-sky-100'}`}>
+                  <h3 className="font-bold text-xl text-medical-navy">{cred.documentType}</h3>
+                  <p className="text-sm text-slate-600 mt-2">Issuer: {cred.issuer}</p>
+                  <p className={`text-sm font-bold mt-2 ${isExpired ? 'text-red-600' : 'text-emerald-600'}`}>
+                    {isExpired ? `Expired: ${new Date(cred.validUntil).toLocaleDateString()}` : `Valid until: ${new Date(cred.validUntil).toLocaleDateString()}`}
+                  </p>
+                  
+                  {activeRequest && (
+                    <button 
+                      onClick={() => handleGenerateProof(cred)}
+                      disabled={loading || !canFulfill || isExpired}
+                      className={`mt-4 w-full px-4 py-2 rounded font-semibold text-white transition 
+                        ${isExpired ? 'bg-red-300 cursor-not-allowed' : 
+                          canFulfill ? 'bg-medical-blue hover:bg-sky-700' : 'bg-slate-300 cursor-not-allowed'}`}
+                    >
+                      {loading ? "Generating ZKP..." : 
+                       isExpired ? "Document Expired" : 
+                       canFulfill ? "Use This Document" : "Missing Required Data"}
+                    </button>
+                  )}
                 </div>
-              </div>
-            );
-          })}
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {/* VIEW: AUDIT HISTORY */}
+      {activeTab === "history" && (
+        <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+          {auditLogs.length === 0 ? (
+            <p className="p-8 text-center text-slate-500">No access history found. Your data has not been shared yet.</p>
+          ) : (
+            <table className="w-full text-left">
+              <thead className="bg-slate-50 text-slate-600 text-sm">
+                <tr>
+                  <th className="p-4 border-b">Date</th>
+                  <th className="p-4 border-b">Verifier</th>
+                  <th className="p-4 border-b">Document Used</th>
+                  <th className="p-4 border-b">Policy Checked</th>
+                  <th className="p-4 border-b">Result</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {auditLogs.map(log => (
+                  <tr key={log._id} className="border-b last:border-0 hover:bg-slate-50">
+                    <td className="p-4 text-slate-600">{new Date(log.timestamp).toLocaleString()}</td>
+                    <td className="p-4 font-semibold text-slate-800">{log.verifierId}</td>
+                    <td className="p-4 text-medical-navy">{log.documentType}</td>
+                    <td className="p-4 font-mono text-xs bg-slate-100 rounded px-2">{log.policyChecked}</td>
+                    <td className="p-4">
+                      <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${log.status === 'verified' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                        {log.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
     </div>

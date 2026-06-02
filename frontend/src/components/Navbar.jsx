@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 
 const links = [
   { to: "/issuer", label: "Issuer Portal" },
@@ -7,6 +7,7 @@ const links = [
 ];
 
 export default function Navbar() {
+  const navigate = useNavigate();
   return (
     <header className="border-b border-sky-100 bg-white/90 shadow-sm backdrop-blur">
       <nav className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
@@ -14,7 +15,7 @@ export default function Navbar() {
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-medical-blue">
             Local Only ZKP Demo
           </p>
-          <h1 className="text-xl font-bold text-medical-navy sm:text-2xl">
+          <h1 className="text-xl font-bold text-medical-navy sm:text-2xl cursor-pointer hover:opacity-80 transition" onClick={() => navigate('/')}>
             ZKP Document Verification
           </h1>
         </div>

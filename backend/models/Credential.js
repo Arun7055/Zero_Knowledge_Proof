@@ -8,6 +8,7 @@ const credentialSchema = new mongoose.Schema({
   documentType: { type: String, required: true },
   parameters: { type: Object, required: true }, // Stores the dynamic keys like Blood_Sugar or GPA
   signature: { type: String, required: true },
+  validUntil: { type: Date, required: true }
 }, { timestamps: true });
 
 export default mongoose.model('Credential', credentialSchema);

@@ -6,7 +6,7 @@ export default function VerifierPortal() {
   const [apiKey, setApiKey] = useState("verify999");
   
   // Create Request State
-  const [reqForm, setReqForm] = useState({ parameterKey: "Blood_Sugar", operator: "<", threshold: "100" });
+  const [reqForm, setReqForm] = useState({ parameterKey: "", operator: "", threshold: "" });
   const [createdRequest, setCreatedRequest] = useState(null);
   
   // Check Request State
