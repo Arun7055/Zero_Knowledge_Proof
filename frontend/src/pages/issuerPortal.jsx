@@ -74,12 +74,12 @@ export default function IssuerPortal() {
         {/* Main Document Details */}
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Patient / User ID</label>
-            <input required value={issueForm.patientId} onChange={e => setIssueForm({...issueForm, patientId: e.target.value})} placeholder="e.g. PAT-2048" className="border p-2 rounded" />
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">User ID</label>
+            <input required value={issueForm.patientId} onChange={e => setIssueForm({...issueForm, patientId: e.target.value})} placeholder="e.g. ABC-2048" className="border p-2 rounded" />
           </div>
           <div className="flex flex-col">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Document Type</label>
-            <input required value={issueForm.documentType} onChange={e => setIssueForm({...issueForm, documentType: e.target.value})} placeholder="e.g. Blood Test" className="border p-2 rounded" />
+            <input required value={issueForm.documentType} onChange={e => setIssueForm({...issueForm, documentType: e.target.value})} placeholder="e.g. Blood Test / Report Card" className="border p-2 rounded" />
           </div>
         </div>
 
@@ -98,12 +98,12 @@ export default function IssuerPortal() {
                 const newParams = [...parameters];
                 newParams[index].key = e.target.value;
                 setParameters(newParams);
-              }} placeholder="Key (e.g. Blood_Sugar)" className="border p-2 rounded flex-1" />
+              }} placeholder="Key" className="border p-2 rounded flex-1" />
               <input value={param.value} onChange={e => {
                 const newParams = [...parameters];
                 newParams[index].value = e.target.value;
                 setParameters(newParams);
-              }} placeholder="Value (e.g. 90)" className="border p-2 rounded flex-1" />
+              }} placeholder="Value" className="border p-2 rounded flex-1" />
             </div>
           ))}
           <button type="button" onClick={() => setParameters([...parameters, {key:"", value:""}])} className="text-medical-blue font-semibold text-sm hover:underline mt-1">

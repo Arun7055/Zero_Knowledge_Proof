@@ -56,13 +56,13 @@ export default function VerifierPortal() {
       <div className="p-6 bg-white rounded-lg shadow-soft border border-sky-100">
         <h2 className="text-xl font-bold text-medical-navy">1. Set Policy</h2>
         <form onSubmit={handleCreateRequest} className="mt-4 grid gap-4">
-          <input value={reqForm.parameterKey} onChange={e => setReqForm({...reqForm, parameterKey: e.target.value})} className="border p-2 rounded" placeholder="Parameter (e.g. Blood_Sugar)" />
+          <input value={reqForm.parameterKey} onChange={e => setReqForm({...reqForm, parameterKey: e.target.value})} className="border p-2 rounded" placeholder="Parameter" />
           <select value={reqForm.operator} onChange={e => setReqForm({...reqForm, operator: e.target.value})} className="border p-2 rounded">
             <option value="<">&lt; Less Than</option>
             <option value=">">&gt; Greater Than</option>
             <option value="=">= Equals</option>
           </select>
-          <input value={reqForm.threshold} onChange={e => setReqForm({...reqForm, threshold: e.target.value})} className="border p-2 rounded" placeholder="Threshold (e.g. 100)" />
+          <input value={reqForm.threshold} onChange={e => setReqForm({...reqForm, threshold: e.target.value})} className="border p-2 rounded" placeholder="Threshold" />
           <button type="submit" className="bg-medical-navy text-white p-2 rounded">Generate Request ID</button>
         </form>
 
