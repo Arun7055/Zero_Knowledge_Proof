@@ -58,7 +58,13 @@ export const api = {
   // ==========================================
   issueCredential: (payload, token) => 
     fetchWithAuth("/issuer/credential", "POST", payload, token),
-
+  getIssuerHistory: async (token) => {
+    const res = await fetch(`${BASE_URL}/issuer/history`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
 
   // ==========================================
   // PROVER (Patient) ENDPOINTS
@@ -73,4 +79,11 @@ export const api = {
   // ==========================================
   createRequest: (payload, token) => fetchWithAuth("/verifier/request", "POST", payload, token),
   checkRequestStatus: (reqId, token) => fetchWithAuth(`/verifier/request/${reqId}`, "GET", null, token),
+  getVerifierHistory: async (token) => {
+    const res = await fetch(`${BASE_URL}/verifier/history`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  },
 };

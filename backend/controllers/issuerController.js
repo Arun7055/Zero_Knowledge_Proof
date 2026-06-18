@@ -34,8 +34,16 @@ export const issueCredential = async (req, res) => {
 
 export const getIssuedHistory = async (req, res) => {
   try {
-    // Find all credentials issued by this specific issuer
-    const credentials = await Credential.find({ issuer: req.user.id }).sort({ createdAt: -1 });
+    // We use $or so MongoDB checks if the string "BANK-1" matches the JWT's id, username, or name.
+    const credentials = await Credential.find({ 
+      $or: [
+        { issuer: req.user.id },
+        { issuer: req.user.username },
+        { issuer: req.user.name },
+        { issuer: req.user.issuerId } // Catches custom ID fields
+      ]
+    }).sort({ createdAt: -1 });
+
     res.json({ credentials });
   } catch (err) {
     res.status(500).json({ error: err.message });
