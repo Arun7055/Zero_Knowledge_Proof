@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { api } from "../utils/api.js";
+import QRCode from "react-qr-code"; // <-- New Import
 
 export default function VerifierPortal() {
   const [token, setToken] = useState(null);
@@ -28,7 +29,7 @@ export default function VerifierPortal() {
       const res = await api.createRequest(reqForm, token);
       setCreatedRequest(res.request);
       setCheckId(res.request.id);
-      setMessage("Request generated! Give this ID to the patient.");
+      setMessage("Request generated! Give this ID to the user.");
     } catch (err) { setMessage(err.message); }
   }
 
@@ -40,7 +41,7 @@ export default function VerifierPortal() {
     } catch (err) { setMessage(err.message); }
   }
 
-  if (!token) return ( /* Your existing Login form here */
+  if (!token) return (
       <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-soft border border-sky-100">
         <h2 className="text-2xl font-bold text-medical-navy">Verifier Login</h2>
         <form onSubmit={handleLogin} className="mt-4 grid gap-4">
@@ -56,20 +57,28 @@ export default function VerifierPortal() {
       <div className="p-6 bg-white rounded-lg shadow-soft border border-sky-100">
         <h2 className="text-xl font-bold text-medical-navy">1. Set Policy</h2>
         <form onSubmit={handleCreateRequest} className="mt-4 grid gap-4">
-          <input value={reqForm.parameterKey} onChange={e => setReqForm({...reqForm, parameterKey: e.target.value})} className="border p-2 rounded" placeholder="Parameter" />
+          <input value={reqForm.parameterKey} onChange={e => setReqForm({...reqForm, parameterKey: e.target.value})} className="border p-2 rounded" placeholder="Parameter (e.g. CreditScore)" />
           <select value={reqForm.operator} onChange={e => setReqForm({...reqForm, operator: e.target.value})} className="border p-2 rounded">
             <option value="<">&lt; Less Than</option>
             <option value=">">&gt; Greater Than</option>
             <option value="=">= Equals</option>
           </select>
-          <input value={reqForm.threshold} onChange={e => setReqForm({...reqForm, threshold: e.target.value})} className="border p-2 rounded" placeholder="Threshold" />
-          <button type="submit" className="bg-medical-navy text-white p-2 rounded">Generate Request ID</button>
+          <input value={reqForm.threshold} onChange={e => setReqForm({...reqForm, threshold: e.target.value})} className="border p-2 rounded" placeholder="Threshold (e.g. 700)" />
+          <button type="submit" className="bg-medical-navy text-white p-2 rounded">Generate Policy Request</button>
         </form>
 
         {createdRequest && (
-          <div className="mt-4 p-4 bg-sky-50 rounded border border-sky-200">
-            <p className="text-sm font-bold text-sky-800">Share this ID with the Patient:</p>
-            <p className="font-mono text-lg font-bold text-medical-navy">{createdRequest.id}</p>
+          <div className="mt-6 p-6 bg-sky-50 rounded-lg border border-sky-200 flex flex-col items-center text-center">
+            <p className="text-sm font-bold text-sky-800 mb-4">Share this QR Code or ID with the User:</p>
+            
+            {/* The QR Code Graphic */}
+            <div className="bg-white p-4 rounded-xl shadow-sm mb-4 border border-sky-100">
+              <QRCode value={createdRequest.id} size={160} level="H" fgColor="#0f172a" />
+            </div>
+            
+            <p className="font-mono text-lg font-bold text-medical-navy tracking-wider bg-white px-3 py-1 rounded shadow-sm border border-slate-200">
+              {createdRequest.id}
+            </p>
           </div>
         )}
       </div>
