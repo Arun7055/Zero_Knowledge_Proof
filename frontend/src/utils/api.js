@@ -91,7 +91,7 @@ export const api = {
   // STATS ENDPOINTS
   // ==========================================
   getSystemStats: async () => {
-    const res = await fetch(`${BASE_URL}/stats`);
+    const res = await fetch(`${BASE_URL}/stats/stats`);
     if (!res.ok) throw new Error("Failed to fetch stats");
     return res.json();
   },

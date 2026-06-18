@@ -22,7 +22,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/issuer", issuerRoutes);
 app.use("/api/prover", proverRoutes);
 app.use("/api/verifier", verifierRoutes);
-app.use("api/stats", homeRoutes)
+app.use("/api/home", homeRoutes)
 
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, "0.0.0.0",() => {
