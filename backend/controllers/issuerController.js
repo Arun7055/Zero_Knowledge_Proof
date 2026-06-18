@@ -31,3 +31,13 @@ export const issueCredential = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getIssuedHistory = async (req, res) => {
+  try {
+    // Find all credentials issued by this specific issuer
+    const credentials = await Credential.find({ issuer: req.user.id }).sort({ createdAt: -1 });
+    res.json({ credentials });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

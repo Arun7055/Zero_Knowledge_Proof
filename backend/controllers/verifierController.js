@@ -1,4 +1,5 @@
 import Request from "../models/Request.js";
+import AuditLog from '../models/AuditLog.js';
 
 // 1. Verifier creates a verification policy condition
 export const createRequest = async (req, res) => {
@@ -36,5 +37,16 @@ export const checkRequestStatus = async (req, res) => {
     res.json({ request });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+//3.verification history
+export const getVerifierHistory = async (req, res) => {
+  try {
+    // Find all audit logs verified by this specific verifier
+    const logs = await AuditLog.find({ verifierId: req.user.id }).sort({ timestamp: -1 });
+    res.json({ logs });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
