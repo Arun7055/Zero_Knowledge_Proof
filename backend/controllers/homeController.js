@@ -5,7 +5,7 @@ export const getStats = async (req, res) => {
     try {
         const totalCredentials = await Credential.countDocuments();
         const successfulVerifications = await AuditLog.countDocuments({ status: 'verified' });
-        const failedVerifications = await AuditLog.countDocuments({ status: 'rejected' });
+        const failedVerifications = await AuditLog.countDocuments({ status: 'failed' });
         
         res.json({ 
           totalCredentials, 
