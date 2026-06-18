@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-// import { api } from "../utils/api.js";
-
-// Mock API for Canvas Preview
-const api = {
-  loginIssuer: async () => ({ token: "mock-token", user: { name: "Mock Doctor" } }),
-  getIssuerHistory: async () => ({ credentials: [] }),
-  issueCredential: async () => ({ success: true })
-};
+import { api } from "../utils/api.js";
 
 export default function IssuerPortal() {
   const [token, setToken] = useState(null);
