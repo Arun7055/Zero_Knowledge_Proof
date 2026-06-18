@@ -1,6 +1,29 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { api } from "../utils/api.js";
 
 export default function Home() {
+  const [stats, setStats] = useState({
+    totalCredentials: 0,
+    successfulVerifications: 0,
+    totalVerifications: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const data = await api.getSystemStats();
+        setStats(data);
+      } catch (err) {
+        console.error("Could not load stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadStats();
+  }, []);
+
   return (
     <section className="mx-auto max-w-4xl py-12">
       <div className="text-center">
@@ -15,7 +38,29 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="mt-16 grid gap-8 sm:grid-cols-3">
+      {/* --- LIVE NETWORK STATS --- */}
+      <div className="mt-12 grid gap-4 sm:grid-cols-3 border-y border-slate-200 py-8">
+        <div className="text-center">
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Active Credentials</p>
+          <p className="text-4xl font-extrabold text-medical-navy">
+            {loading ? "..." : stats.totalCredentials}
+          </p>
+        </div>
+        <div className="text-center border-x border-slate-200">
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Total Verifications</p>
+          <p className="text-4xl font-extrabold text-medical-navy">
+            {loading ? "..." : stats.totalVerifications}
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Zero-Knowledge Proofs</p>
+          <p className="text-4xl font-extrabold text-emerald-600">
+            {loading ? "..." : stats.successfulVerifications}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-12 grid gap-8 sm:grid-cols-3">
         {/* Issuer Card */}
         <Link
           to="/issuer"

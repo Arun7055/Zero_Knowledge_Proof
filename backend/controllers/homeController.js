@@ -1,5 +1,5 @@
-import Credential from "./models/Credential.js";
-import AuditLog from "./models/AuditLog.js";
+import Credential from "../models/Credential.js";
+import AuditLog from "../models/AuditLog.js";
 
 export const getStats = async (req, res) => {
     try {
