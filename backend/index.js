@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes.js";
 import issuerRoutes from "./routes/issuerRoutes.js";
 import proverRoutes from "./routes/proverRoutes.js";
 import verifierRoutes from "./routes/verifierRoutes.js";
+import homeRoutes from "./routes/homeRoutes.js";
 import { connectDB } from './config/db.js';
 
 const app = express();
@@ -21,6 +22,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/issuer", issuerRoutes);
 app.use("/api/prover", proverRoutes);
 app.use("/api/verifier", verifierRoutes);
+app.use("api/stats", homeRoutes)
 
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, "0.0.0.0",() => {
