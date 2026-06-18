@@ -1,5 +1,5 @@
 import express from "express";
-import { getStats } from "../controllers/homeController";
+import { getStats } from "../controllers/homeController.js";
 
 const router = express.Router();
 

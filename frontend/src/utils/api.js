@@ -86,4 +86,13 @@ export const api = {
     if (!res.ok) throw new Error(await res.text());
     return res.json();
   },
+
+  // ==========================================
+  // STATS ENDPOINTS
+  // ==========================================
+  getSystemStats: async () => {
+    const res = await fetch(`${BASE_URL}/stats`);
+    if (!res.ok) throw new Error("Failed to fetch stats");
+    return res.json();
+  },
 };
