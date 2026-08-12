@@ -11,7 +11,8 @@ This project implements the complete data-routing pipeline required for decentra
 ## 🏗️ System Architecture: The SSI Trust Triangle
 
 This system is divided into three distinct bounded contexts, representing the SSI Trust Triangle:
-<img width="642" height="306" alt="image" src="https://github.com/user-attachments/assets/c9d2cf5b-48ef-4aee-8046-ba5650236254" />
+<img width="648" height="312" alt="image" src="https://github.com/user-attachments/assets/5ddca110-a71e-450d-911c-f4958c5a330c" />
+
 
 
 All 3 parties' history is stored and can be accesed easily for future requirements.
