@@ -1,4 +1,4 @@
-# Zero-Knowledge SSI Identity Network (Architecture PoC)
+# Zero-Knowledge SSI Identity Network 
 
 A full-stack distributed system demonstrating the architecture of a **Self-Sovereign Identity (SSI)** network using the principles of Zero-Knowledge Proofs (ZKP). 
 Live Demo : https://zero-knowledge-proof-kappa.vercel.app/
@@ -11,7 +11,8 @@ This project implements the complete data-routing pipeline required for decentra
 ## 🏗️ System Architecture: The SSI Trust Triangle
 
 This system is divided into three distinct bounded contexts, representing the SSI Trust Triangle:
-<img width="692" height="1050" alt="image" src="https://github.com/user-attachments/assets/09c49df8-b003-47b1-b76d-410cdf9e8a9b" />
+<img width="642" height="306" alt="image" src="https://github.com/user-attachments/assets/c9d2cf5b-48ef-4aee-8046-ba5650236254" />
+
 
 All 3 parties' history is stored and can be accesed easily for future requirements.
 
